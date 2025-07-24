@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import './App.css';
+import { Link } from "react-router-dom";
+
 const API_KEY = import.meta.env.VITE_SPOONACULAR_API_KEY;
 
 function App() {
@@ -8,21 +10,58 @@ function App() {
   const [dietFilter, setDietFilter] = useState("all");
   const [error, setError] = useState(null);
 
+  // useEffect(() => {
+  //   const fetchRecipes = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         `https://api.spoonacular.com/recipes/random?number=20&apiKey=${API_KEY}`
+  //       );
+  //       const data = await res.json();
+  //       setRecipes(data.recipes); // 'recipes' is the array inside the response
+  //     } catch (err) {
+  //       console.error("Error fetching recipes:", err);
+  //     }
+  //   };
+
+  //   fetchRecipes();
+  // }, []);
+
   useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
+  const fetchRecipes = async () => {
+    
+
+    try {
+      if (!searchQuery.trim() && dietFilter === "all") {
         const res = await fetch(
-          `https://api.spoonacular.com/recipes/random?number=10&apiKey=${API_KEY}`
+          `https://api.spoonacular.com/recipes/random?number=5&apiKey=${API_KEY}`
         );
         const data = await res.json();
-        setRecipes(data.recipes); // 'recipes' is the array inside the response
-      } catch (err) {
-        console.error("Error fetching recipes:", err);
+        setRecipes(data.recipes);
       }
-    };
+      else {
+      const url = `https://api.spoonacular.com/recipes/complexSearch?query=${searchQuery}&number=10${dietFilter !== "all" ? `&diet=${dietFilter}` : ""}&apiKey=${API_KEY}`;
+  
+      const res = await fetch(url);
+      const data = await res.json();
 
-    fetchRecipes();
-  }, []);
+      const detailed = await Promise.all(
+        data.results.map((r) =>
+          fetch(
+            `https://api.spoonacular.com/recipes/${r.id}/information?apiKey=${API_KEY}`
+          ).then((res) => res.json())
+        )
+      );
+
+      setRecipes(detailed);
+    }
+    } catch (err) {
+      console.error("Search failed:", err);
+    }
+  };
+
+  const delay = setTimeout(fetchRecipes, 500); // debounce typing
+  return () => clearTimeout(delay);
+}, [searchQuery, dietFilter]); // ⬅️ watch both inputs
 
 
   const filteredRecipes = recipes
@@ -99,6 +138,22 @@ function App() {
                   ))}
                 </ul>
               </p>
+             <Link
+                to={`/recipe/${r.id}`}
+                style={{
+                  backgroundColor: "#333",
+                  color: "white",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "6px",
+                  textDecoration: "none",
+                  display: "inline-block",
+                  marginTop: "0.5rem",
+                  fontWeight: "bold",
+                  boxShadow: "0 2px 5px rgba(0,0,0,0.2)"
+                }}
+              >
+                View Details
+              </Link>
             </div>
           </div>
         ))
