@@ -38,7 +38,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='/demo2.gif" alt="Demo" width="100%"' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src="public/demo2.gif" alt="Demo" width="100%" />
 
 <!-- Replace this with whatever GIF tool you used! -->
 GIF created with LICEcap
